@@ -1,0 +1,82 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+ 
+
+trigger:
+- master
+- develop
+pr:
+  branches:
+    include:
+    - master
+    - develop
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  projectKey: 'trustpower-dev.visualstudio.com.$(System.TeamProjectId).$(Build.Repository.ID).netfx'
+  projectName:  '$(System.TeamProject).$(Build.Repository.Name)'
+  organization: 'trustpower' 
+
+stages:
+- stage: createsonarcloudproject
+  jobs:
+  - job: SonarCloudSetup
+    pool: server
+    condition: eq(variables['setupSonarCloudProject'],'true')
+    steps: 
+     - task: InvokeRESTAPI@1
+       inputs:
+         connectionType: 'connectedServiceName'
+         serviceConnection: 'SonarCloud Create Project'
+         method: 'POST'
+        
+         urlSuffix: '?organization=$(organization)&name=$(projectName)&visibility=private&project=$(projectKey)'
+         waitForCompletion: 'false'
+         
+  - job: SonarCloudAnalyse
+    pool:
+     vmImage: windows-2019
+    steps:
+      - task: NuGetToolInstaller@0
+        displayName: 'Use NuGet 4.4.1'
+        inputs:
+          versionSpec: '4.4.1'
+      - task: NuGetCommand@2
+        displayName: 'NuGet restore'
+        inputs:
+          restoreSolution: '$(solution)'
+          feedsToUse: config
+          nugetConfigPath: NuGet.config
+      - task: SonarCloudPrepare@1
+        displayName: 'Prepare analysis on SonarCloud'
+        inputs:
+          SonarCloud: SonarCloud
+          organization: '$(organization)'
+          projectKey: '$(projectKey)'
+          projectName: '$(projectName)'
+          projectVersion: 4.3
+      - task: VSBuild@1
+        inputs:
+          solution: '$(solution)'
+          msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+      - task: VSTest@2
+        displayName: 'Test Assemblies'
+        inputs:
+          testAssemblyVer2: |
+            **\$(BuildConfiguration)\*test*.dll
+            !**\obj\**
+          platform: '$(BuildPlatform)'
+          configuration: '$(BuildConfiguration)'
+          diagnosticsEnabled: True
+      - task: SonarCloudAnalyze@1
+        displayName: 'Run Code Analysis'
+
+      - task: SonarCloudPublish@1
+        displayName: 'Publish Quality Gate Result'

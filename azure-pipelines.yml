@@ -1,0 +1,61 @@
+# ASP.NET Core
+
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Develop'
+  buildProject: '**/*.sln'
+  
+steps:
+- task: UseDotNet@2
+  displayName: 'Use .Net Core 3.x SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '3.x'
+    includePreviewVersions: true
+
+- task: NuGetToolInstaller@1
+  displayName: 'Use NuGet 5.4.0'
+  inputs:
+    versionSpec: 5.4.0
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'select'
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    command: build
+    projects: '**/*.csproj'
+    arguments: '--configuration Release' # Update this to match your need
+
+- task: DotNetCoreCLI@2
+  displayName: 'Unit tests'
+  inputs:
+    command: test
+    projects: '**/*Test.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish API'
+  inputs:
+    command: publish
+    arguments: '--configuration Develop --output $(build.artifactstagingdirectory)/api'
+    zipAfterPublish: True
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish API Artifact'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)/api'
+    ArtifactName: api
+

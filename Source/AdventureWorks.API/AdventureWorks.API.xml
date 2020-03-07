@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AdventureWorks.API</name>
+    </assembly>
+    <members>
+        <member name="M:AdventureWorks.Api.Controllers.AdventureWorksController.GetPersonsNameByBusinessId(System.Int32)">
+            <summary>
+            This Get method returns a persons name
+            </summary>
+        </member>
+        <member name="M:AdventureWorks.Api.Controllers.AdventureWorksController.UpdatePersonBybussinessId(System.Int32,AdventureWorks.Service.Dtos.Collections.PersonNameBaseDto)">
+            <summary>
+            This Patch method Updates a persons Name
+            </summary>
+        </member>
+        <member name="M:AdventureWorks.Api.Controllers.AdventureWorksController.GetPersonByBusinessEntity(System.Int32)">
+            <summary>
+            This Gets a persons basic information
+            </summary>
+        </member>
+    </members>
+</doc>
