@@ -31,13 +31,6 @@ namespace AdventureWorks.Api
 
         public static IHostBuilder CreateHostBuilder(string[] args) => Host
             .CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((hostBuilderContext, configBuilder) =>
-            {
-                if (!hostBuilderContext.HostingEnvironment.IsDevelopment())
-                {
-                    AddAzureKeyVault(configBuilder);
-                }
-            })
             .ConfigureLogging((hostBuilderContext, loggingBuilder) =>
             {
                 loggingBuilder
@@ -51,17 +44,5 @@ namespace AdventureWorks.Api
                 }
             })
             .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
-
-        private static void AddAzureKeyVault(IConfigurationBuilder configBuilder)
-        {
-            var azureServiceTokenProvider = new AzureServiceTokenProvider();
-            var authCallback = new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback);
-            var keyVaultClient = new KeyVaultClient(authCallback);
-
-            configBuilder.AddAzureKeyVault(
-                vault: $"https://{configBuilder.Build()["KeyVaultName"]}.vault.azure.net/",
-                client: keyVaultClient,
-                manager: new DefaultKeyVaultSecretManager());
-        }
     }
 }
