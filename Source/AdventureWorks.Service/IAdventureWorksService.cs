@@ -6,8 +6,9 @@ namespace AdventureWorks.Service
 {
     public interface IAdventureWorksService
     {
-        Task<PersonNameDto> GetPersonsNameAsync(int businessEntityId);
-        Task<PersonNameDto> PatchPersonsNameAsync(int businessEntityId, PersonNameBaseDto personNameDto);
-        Task<PersonDto> GetPersonAsync(int businessEntityId);
+        Task<PersonNameDto> GetPersonsNameAsync(int businessEntityId, CancellationToken cancellation);
+        Task<PersonNameDto> PatchPersonsNameAsync(int businessEntityId, PersonNameBaseDto personNameDto,
+            CancellationToken cancellation);
+        Task<PersonDto> GetPersonAsync(int businessEntityId, CancellationToken cancellation);
     }
 }

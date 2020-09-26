@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using AdventureWorks.Api.Extensions;
 using AdventureWorks.Service;
 using AdventureWorks.Service.Dtos.Collections;
 using Microsoft.AspNetCore.Authorization;
@@ -18,42 +20,42 @@ namespace AdventureWorks.Api.Controllers
         }
 
         /// <summary>
-        /// This Get method returns a persons name
+        /// GET returns a persons name
         /// </summary>
         [HttpGet("Name")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> GetPersonsNameByBusinessId(int businessId)
+        public async Task<ActionResult> GetPersonsNameByBusinessId(int businessId, CancellationToken cancellation)
         {
-            var response = await _adventureWorksService.GetPersonsNameAsync(businessId);
+            var response = await _adventureWorksService.GetPersonsNameAsync(businessId, cancellation);
             if (response == null)
                 return NotFound($"Couldn't find the person for the given businessId {businessId}");
-            return Ok(response);
+            return Ok(response.Map());
         }
 
         /// <summary>
-        /// This Patch method Updates a persons Name
+        /// PATCH Updates a persons Name
         /// </summary>
         [HttpPatch("Name")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> UpdatePersonBybussinessId(int businessId, [FromBody] PersonNameBaseDto personName)
+        public async Task<ActionResult> UpdatePersonBybussinessId(int businessId, [FromBody] PersonNameBaseDto personName, CancellationToken cancellation)
         {
-            var response = await _adventureWorksService.PatchPersonsNameAsync(businessId, personName);
+            var response = await _adventureWorksService.PatchPersonsNameAsync(businessId, personName, cancellation);
             if (response == null)
                 return NotFound($"Couldn't find the person for the given businessId {businessId}");
-            return Ok(response);
+            return Ok(response.Map());
         }
             
         /// <summary>
-        /// This Gets a persons basic information
+        /// GET returns persons basic information
         /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> GetPersonByBusinessEntity(int businessId)
+        public async Task<ActionResult> GetPersonByBusinessEntity(int businessId, CancellationToken cancellation)
         {
-            var response = await _adventureWorksService.GetPersonAsync(businessId);
+            var response = await _adventureWorksService.GetPersonAsync(businessId, cancellation);
             if (response == null)
                 return NotFound($"Couldn't find the person for the given businessId {businessId}");
-            return Ok(response);
+            return Ok(response.Map());
         }
     }
 }
