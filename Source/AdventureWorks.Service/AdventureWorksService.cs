@@ -32,18 +32,17 @@ namespace AdventureWorks.Service
 
         #endregion
 
-        public async Task<PersonNameDto> GetPersonsNameAsync(int businessEntityId, CancellationToken cancellation)
+        public async Task<PersonNameDto> GetPersonsNameAsync(Guid rowGuid, CancellationToken cancellation)
         {
-            var person = (await _repo.Person.Where(c => c.BusinessEntityId == businessEntityId).AsNoTracking().ToListAsync(cancellation))
+            var person = (await _repo.Person.Where(c => c.Rowguid == rowGuid).AsNoTracking().ToListAsync(cancellation))
                 .FirstOrDefault();
-            if (person == null)
-                return null;
-            return _mapper.Map<PersonNameDto>(person);
+            return person == null ? null : _mapper.Map<PersonNameDto>(person);
         }
 
-        public async Task<PersonNameDto> PatchPersonsNameAsync(int businessEntityId, PersonNameBaseDto personNameDto, CancellationToken cancellation)
+        public async Task<PersonNameDto> PatchPersonsNameAsync(Guid rowGuid, PersonNameBaseDto personNameDto,
+            CancellationToken cancellation)
         {
-            var person = (await _repo.Person.Where(c => c.BusinessEntityId == businessEntityId).ToListAsync(cancellation)).FirstOrDefault();
+            var person = (await _repo.Person.Where(c => c.Rowguid == rowGuid).ToListAsync(cancellation)).FirstOrDefault();
             if (person == null)
                 return null;
             person.FirstName = personNameDto.FirstName;
@@ -54,16 +53,17 @@ namespace AdventureWorks.Service
             return _mapper.Map<PersonNameDto>(person);  
         }
 
-        public async Task<PersonDto> GetPersonAsync(int businessEntityId, CancellationToken cancellation)
+        public async Task<PersonDto> GetPersonAsync(Guid rowGuid, CancellationToken cancellation)
         {
-            var person = (await _repo.Person.Include(c => c.BusinessEntity).Include(c => c.EmailAddress)
+            var person = (await _repo.Person.Include(c => c.BusinessEntity)
+                .Include(c => c.EmailAddress)
                 .Include(c => c.BusinessEntityContact)
                 .Include(c => c.PersonPhone)
                 .Include(c => c.PersonCreditCard)
                 .ThenInclude(c => c.CreditCard)
                 .Include(c => c.BusinessEntityContact)
                 .Include(c => c.Customer)
-                .Where(c => c.BusinessEntityId == businessEntityId).AsNoTracking().ToListAsync(cancellation)).FirstOrDefault();
+                .Where(c => c.Rowguid == rowGuid).AsNoTracking().ToListAsync(cancellation)).FirstOrDefault();
             if (person == null)
                 return null;
             return _mapper.Map<PersonDto>(person);
